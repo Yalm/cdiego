@@ -64,7 +64,7 @@ export class AuthService {
         });
 
         await this.sendGrid.send({
-            from: options.from || `no-reply@cdiego.com`,
+            from: options.from || `no-reply@comercialdiego.com`,
             to: email,
             subject: 'Verifica tu dirección de correo electrónico',
             html: verification({ host: options.host, token, name: options.name })
@@ -86,7 +86,7 @@ export class AuthService {
         });
 
         await this.sendGrid.send({
-            from: options.from || `no-reply@cdiego.com`,
+            from: options.from || `no-reply@comercialdiego.com`,
             to: email,
             subject: 'Cambia la contraseña',
             html: reset({ email, host: options.host, token })
