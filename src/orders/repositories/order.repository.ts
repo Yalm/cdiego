@@ -10,7 +10,7 @@ export class OrderRepository extends Repository<Order> {
             .innerJoinAndSelect("orders.payment", "payments")
             .innerJoinAndSelect("orders.state", "states")
             .where('orders."stateId" = :state', { state: 2 })
-            .innerJoinAndSelect('payment.paymentType', 'paymentType');
+            .innerJoinAndSelect('payments.paymentType', 'paymentType');
         if (filter.date_init) {
             query = query.andWhere('order."createdAt" >= :date_init', filter)
                 .andWhere('order."createdAt" < :date_end', filter);
@@ -24,9 +24,8 @@ export class OrderRepository extends Repository<Order> {
 
     topCustomer(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
         let query = this.createQueryBuilder('orders')
-            .select(['customers.name', 'customers.surnames', 'customers.phone', 'customers.email'])
             .addSelect('COUNT("customerId")', "purchases")
-            .innerJoin("orders.customer", "customers")
+            .innerJoinAndSelect("orders.customer", "customers")
             .where('orders."stateId" = :state', { state: 2 });
         if (filter.date_init) {
             query = query.andWhere('orders."createdAt" >= :date_init', filter)
