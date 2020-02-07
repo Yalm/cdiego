@@ -33,7 +33,7 @@ export class ProductsController {
     }
 
     @Get()
-    findAll(@Query() query: { search: string, category: string, skip: number }): Promise<[Product[], number]> {
+    findAll(@Query() query: { search: string, category: string, limit: number, skip: number }): Promise<[Product[], number]> {
         return this.productRepository.paginate(query);
     }
 
