@@ -70,6 +70,7 @@ export class ProductsController {
             name: product.name,
             description: product.description,
             price: product.price,
+            stock: product.stock,
             category: product.category,
             shortDescription: product.shortDescription
         });
