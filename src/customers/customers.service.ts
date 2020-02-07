@@ -55,7 +55,7 @@ export class CustomersService {
     // }
 
     findByEmail(email: string): Promise<Customer> {
-        return this.customerRepository.findOne({ where: { email }, select: ['password', 'emailVerifiedAt', 'id'] });
+        return this.customerRepository.findOne({ where: { email }, select: ['password', 'emailVerifiedAt', 'id', 'name'] });
     }
 
     updateOne(conditions: FindConditions<Customer>, data: any): Promise<UpdateResult> {
