@@ -74,7 +74,7 @@ export class AuthService {
     async confirmation(validationTokenDto: ValidationTokenDto): Promise<void> {
         const token = await this.validateToken(validationTokenDto);
         await this.customersService.updateOne({ email: token.email }, {
-            emailVerifiedAt: Date.now()
+            emailVerifiedAt: new Date()
         });
     }
 
