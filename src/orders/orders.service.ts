@@ -23,7 +23,7 @@ export class OrdersService {
         let amount = data.items.reduce((total, { price, quantity }) => total += price * quantity, 0);
 
         if (data.shipping) {
-            amount += data.departament === 3655 ? 10 : 30;
+            amount += 10;
         }
 
         const { data: culqi } = await this.culqiService.charge({
@@ -51,7 +51,7 @@ export class OrdersService {
                 order,
                 departamentId: data.departament,
                 provinceId: data.province,
-                price: data.departament === 3655 ? 10 : 30
+                price: 10
             });
         }
 
