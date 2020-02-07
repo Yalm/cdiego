@@ -10,7 +10,7 @@ export class OrderDetailRepository extends Repository<OrderToProduct> {
             .addSelect("SUM(order_details.quantity)", "quantity")
             .innerJoin("order_details.product", "products")
             .innerJoin("order_details.order", "orders")
-            .where("orders.stateId = :state", { state: 2 });
+            .where("orders.`stateId` = :state", { state: 2 });
         if (filter.date_init) {
             query = query.andWhere('orders.createdAt >= :date_init', filter)
                 .andWhere('orders.createdAt < :date_end', filter);
