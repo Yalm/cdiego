@@ -5,7 +5,7 @@ import { OrderToProduct } from "../entities";
 export class OrderDetailRepository extends Repository<OrderToProduct> {
 
     topProduct(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
-        let query = this.createQueryBuilder('order_detail')
+        let query = this.createQueryBuilder()
             .select(['product.id', 'product.name'])
             .addSelect("SUM(order_detail.quantity)", "quantity")
             .innerJoin("order_detail.product", "product")

@@ -5,7 +5,7 @@ import { Order } from "../entities/order.entity";
 export class OrderRepository extends Repository<Order> {
 
     purchases(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
-        let query = this.createQueryBuilder('order')
+        let query = this.createQueryBuilder()
             .innerJoinAndSelect("order.customer", "customer")
             .innerJoinAndSelect("order.payment", "payment")
             .innerJoinAndSelect("order.state", "states")
@@ -23,7 +23,7 @@ export class OrderRepository extends Repository<Order> {
     }
 
     topCustomer(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
-        let query = this.createQueryBuilder('order')
+        let query = this.createQueryBuilder()
             .select(['customer.name', 'customer.surnames', 'customer.phone', 'customer.email'])
             .addSelect("COUNT(customerId)", "purchases")
             .innerJoin("order.customer", "customer")
