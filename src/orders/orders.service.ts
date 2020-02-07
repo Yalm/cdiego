@@ -56,56 +56,14 @@ export class OrdersService {
     }
 
     topProduct(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
-        let query = this.orderDetailRepository
-            .createQueryBuilder('order_detail')
-            .select(['product.id', 'product.name'])
-            .addSelect("SUM(order_detail.quantity)", "quantity")
-            .innerJoin("order_detail.product", "product")
-            .innerJoin("order_detail.order", "order")
-            .where("order.stateId = :state", { state: 2 });
-        if (filter.date_init) {
-            query = query.andWhere('order.createdAt >= :date_init', filter)
-                .andWhere('order.createdAt < :date_end', filter);
-        }
-        return Promise.all([
-            query.limit(filter.take).offset(filter.skip).orderBy("quantity", 'DESC').getMany(),
-            query.getCount()
-        ]);
+        return this.orderDetailRepository.topProduct(filter);
     }
 
     purchases(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
-        let query = this.orderRepository
-            .createQueryBuilder('order')
-            .innerJoinAndSelect("order.customer", "customer")
-            .innerJoinAndSelect("order.payment", "payment")
-            .innerJoinAndSelect("order.state", "states")
-            .where("order.stateId = :state", { state: 2 })
-            .innerJoinAndSelect("payment.paymentType", "paymentType");
-        if (filter.date_init) {
-            query = query.andWhere('order.createdAt >= :date_init', filter)
-                .andWhere('order.createdAt < :date_end', filter);
-        }
-
-        return Promise.all([
-            query.limit(filter.take).offset(filter.skip).orderBy("order.createdAt", 'DESC').getMany(),
-            query.getCount()
-        ]);
+        return this.orderRepository.purchases(filter);
     }
 
     topCustomer(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
-        let query = this.orderRepository
-            .createQueryBuilder('order')
-            .select(['customer.name', 'customer.surnames', 'customer.phone', 'customer.email'])
-            .addSelect("COUNT(customerId)", "purchases")
-            .innerJoin("order.customer", "customer")
-            .where("order.stateId = :state", { state: 2 });
-        if (filter.date_init) {
-            query = query.andWhere('order.createdAt >= :date_init', filter)
-                .andWhere('order.createdAt < :date_end', filter);
-        }
-        return Promise.all([
-            query.limit(filter.take).offset(filter.skip).orderBy("purchases", 'DESC').getMany(),
-            query.getCount()
-        ]);
+        return this.orderRepository.topCustomer(filter);
     }
 }
