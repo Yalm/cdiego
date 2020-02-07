@@ -8,7 +8,7 @@ export class OrderDetailRepository extends Repository<OrderToProduct> {
         let query = this.createQueryBuilder('order_details')
             .select(['products.id', 'products.name'])
             .addSelect("SUM(order_details.quantity)", "quantity")
-            .innerJoin("order_details.product", "products")
+            .innerJoinAndSelect("order_details.product", "products")
             .innerJoin("order_details.order", "orders")
             .where('orders."stateId" = :state', { state: 2 });
         if (filter.date_init) {
