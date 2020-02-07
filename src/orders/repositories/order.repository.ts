@@ -12,12 +12,12 @@ export class OrderRepository extends Repository<Order> {
             .where('orders."stateId" = :state', { state: 2 })
             .innerJoinAndSelect('payments.paymentType', 'paymentType');
         if (filter.date_init) {
-            query = query.andWhere('order."createdAt" >= :date_init', filter)
-                .andWhere('order."createdAt" < :date_end', filter);
+            query = query.andWhere('orders."createdAt" >= :date_init', filter)
+                .andWhere('orders."createdAt" < :date_end', filter);
         }
 
         return Promise.all([
-            query.limit(filter.take).offset(filter.skip).orderBy('order."createdAt"', 'DESC').getMany(),
+            query.limit(filter.take).offset(filter.skip).orderBy('orders."createdAt"', 'DESC').getMany(),
             query.getCount()
         ]);
     }
