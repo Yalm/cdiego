@@ -25,7 +25,8 @@ export class OrderRepository extends Repository<Order> {
     topCustomer(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
         let query = this.createQueryBuilder('orders')
             .addSelect('COUNT("customerId")', "purchases")
-            .innerJoinAndSelect("orders.customer", "customers")
+            .innerJoin("orders.customer", "customers")
+            .groupBy('orders.customer')
             .where('orders."stateId" = :state', { state: 2 });
         if (filter.date_init) {
             query = query.andWhere('orders."createdAt" >= :date_init', filter)
