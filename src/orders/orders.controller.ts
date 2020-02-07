@@ -34,9 +34,9 @@ export class OrdersController {
 
     @Get()
     async findAll(
-        @Query() query: FindManyOptions<Order>
+        @Query() query: { search: string, skip: number, take: number, order: any }
     ): Promise<[Order[], number]> {
-        return this.orderRepository.findAndCount(query);
+        return this.orderRepository.paginate(query);
     }
 
     @UseGuards(AuthGuard('jwt'))
