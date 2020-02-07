@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn, AfterLoad } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Category } from 'src/categories/entities/category.entity';
-import configuration from '../../config/configuration';
 import { OrderToProduct } from 'src/orders/entities/order-detail.entity';
 
 @Entity()
@@ -34,14 +33,6 @@ export class Product {
 
     @OneToMany(() => OrderToProduct, orderToProduct => orderToProduct.product)
     orderToProducts!: OrderToProduct[];
-
-    @AfterLoad()
-    updateCover() {
-        if (this.cover) {
-            const { storage } = configuration();
-            this.cover = `https://${storage.bucket}.s3-${storage.region}.amazonaws.com/${this.cover}/`;
-        }
-    }
 
     @CreateDateColumn()
     createdAt: Date;
