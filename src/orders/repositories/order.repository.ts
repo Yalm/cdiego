@@ -10,9 +10,8 @@ export class OrderRepository extends Repository<Order> {
             .innerJoinAndSelect("orders.state", "states")
         if (filter.search) {
             query = query.where("states.name like :search", { search: `${filter.search}%` })
-                .orWhere('orders.id = :search', filter)
-                .orWhere('customers.name like :search', { search: `${filter.search}%` })
-                .orWhere('orders.amount like :search', { search: `${filter.search}%` });
+                .orWhere('CAST(orders.id AS text) = :search', filter)
+                .orWhere('customers.name like :search', { search: `${filter.search}%` });
         }
 
         if (filter.order) {
