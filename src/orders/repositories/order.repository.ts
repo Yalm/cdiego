@@ -31,6 +31,7 @@ export class OrderRepository extends Repository<Order> {
             .addGroupBy('customers.surnames')
             .addGroupBy('customers.phone')
             .addGroupBy('customers.email')
+            .addGroupBy('customers.id')
             .where('orders."stateId" = :state', { state: 2 });
         if (filter.date_init) {
             query = query.andWhere('orders."createdAt" >= :date_init', filter)
