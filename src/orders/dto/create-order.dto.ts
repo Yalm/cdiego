@@ -6,6 +6,8 @@ export interface Items extends Product {
 
 export interface CreateOrderDto {
     readonly method: string;
+    readonly email: string;
+    readonly culqi_token: string;
     readonly shipping: boolean;
     readonly items: Items[];
     readonly department?: number;

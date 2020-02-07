@@ -56,11 +56,13 @@ export class ProductMigration1580582653747 implements MigrationInterface {
                 },
                 {
                     name: 'createdAt',
-                    type: 'timestamp'
+                    type: 'timestamp',
+                    default: 'now()'
                 },
                 {
                     name: 'updatedAt',
-                    type: 'timestamp'
+                    type: 'timestamp',
+                    default: 'now()'
                 }
             ],
             foreignKeys: [{

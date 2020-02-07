@@ -34,11 +34,13 @@ export class OrderMigration1580582653750 implements MigrationInterface {
                 },
                 {
                     name: 'createdAt',
-                    type: 'timestamp'
+                    type: 'timestamp',
+                    default: 'now()'
                 },
                 {
                     name: 'updatedAt',
-                    type: 'timestamp'
+                    type: 'timestamp',
+                    default: 'now()'
                 }
             ],
             foreignKeys: [{

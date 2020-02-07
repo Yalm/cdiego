@@ -5,12 +5,14 @@ import { ShippingRepository, OrderDetailRepository } from "./repositories";
 import { CreateOrderDto } from "./dto";
 import { ProductsService } from "src/products/products.service";
 import { PaymentsService } from "src/payments/payments.service";
+import { CulqiService } from "./culqi.service";
 
 @Injectable()
 export class OrdersService {
 
     constructor(
         private readonly productsService: ProductsService,
+        private readonly culqiService: CulqiService,
         @InjectRepository(OrderRepository) private readonly orderRepository: OrderRepository,
         private readonly paymentsService: PaymentsService,
         @InjectRepository(OrderDetailRepository) private readonly orderDetailRepository: OrderDetailRepository,
@@ -24,6 +26,13 @@ export class OrdersService {
             amount += data.department === 3655 ? 10 : 30;
         }
 
+        const { data: culqi } = await this.culqiService.charge({
+            amount: amount * 100,
+            currency_code: 'PEN',
+            email: data.email,
+            source_id: data.culqi_token
+        });
+
         const order = await this.orderRepository.save({
             customer: customerId,
             amount, state: 2,
@@ -33,7 +42,7 @@ export class OrdersService {
         await this.paymentsService.store({
             order,
             amount,
-            referenceCode: '',
+            referenceCode: culqi.id,
             paymentType: 1
         } as any);
 
