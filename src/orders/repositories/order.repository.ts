@@ -24,9 +24,13 @@ export class OrderRepository extends Repository<Order> {
 
     topCustomer(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
         let query = this.createQueryBuilder('orders')
+            .select(['customers.name', 'customers.surnames', 'customers.phone', 'customers.email'])
             .addSelect('COUNT("customerId")', "purchases")
             .innerJoin("orders.customer", "customers")
-            .groupBy('orders.customer')
+            .groupBy('customers.name')
+            .addGroupBy('customers.surnames')
+            .addGroupBy('customers.phone')
+            .addGroupBy('customers.email')
             .where('orders."stateId" = :state', { state: 2 });
         if (filter.date_init) {
             query = query.andWhere('orders."createdAt" >= :date_init', filter)
