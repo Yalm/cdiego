@@ -6,6 +6,8 @@ import { CreateOrderDto } from "./dto";
 import { ProductsService } from "src/products/products.service";
 import { PaymentsService } from "src/payments/payments.service";
 import { CulqiService } from "./culqi.service";
+import { SendGridService } from "@anchan828/nest-sendgrid";
+import { orderUser } from "./views/emails/order-user.view";
 
 @Injectable()
 export class OrdersService {
@@ -13,6 +15,7 @@ export class OrdersService {
     constructor(
         private readonly productsService: ProductsService,
         private readonly culqiService: CulqiService,
+        private readonly sendGrid: SendGridService,
         @InjectRepository(OrderRepository) private readonly orderRepository: OrderRepository,
         private readonly paymentsService: PaymentsService,
         @InjectRepository(OrderDetailRepository) private readonly orderDetailRepository: OrderDetailRepository,
@@ -62,6 +65,13 @@ export class OrdersService {
         for (const item of data.items) {
             await this.productsService.decrementStock(item);
         }
+
+        await this.sendGrid.send({
+            from:  'no-reply@comercialdiego.com',
+            to: 'comercialdiegohyo@gmail.com',
+            subject: 'Nuevo pedido',
+            html: orderUser(order)
+        });
     }
 
     topProduct(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
