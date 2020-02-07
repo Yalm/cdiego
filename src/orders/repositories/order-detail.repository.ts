@@ -5,11 +5,11 @@ import { OrderToProduct } from "../entities";
 export class OrderDetailRepository extends Repository<OrderToProduct> {
 
     topProduct(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
-        let query = this.createQueryBuilder()
+        let query = this.createQueryBuilder('order_details')
             .select(['product.id', 'product.name'])
-            .addSelect("SUM(order_detail.quantity)", "quantity")
-            .innerJoin("order_detail.product", "product")
-            .innerJoin("order_detail.order", "order")
+            .addSelect("SUM(order_details.quantity)", "quantity")
+            .innerJoin("order_details.product", "product")
+            .innerJoin("order_details.order", "order")
             .where("order.stateId = :state", { state: 2 });
         if (filter.date_init) {
             query = query.andWhere('order.createdAt >= :date_init', filter)
