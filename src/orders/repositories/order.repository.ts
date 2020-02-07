@@ -17,15 +17,15 @@ export class OrderRepository extends Repository<Order> {
         }
 
         return Promise.all([
-            query.limit(filter.take).offset(filter.skip).orderBy('orders."createdAt"', 'DESC').getMany(),
+            query.limit(filter.take).offset(filter.skip).orderBy('orders.createdAt', 'DESC').getMany(),
             query.getCount()
         ]);
     }
 
     topCustomer(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
         let query = this.createQueryBuilder('orders')
-            .select(['customers.name', 'customers.surnames', 'customers.phone', 'customers.email'])
-            .addSelect('COUNT("customerId")', "purchases")
+            .select('COUNT("customerId")', "purchases")
+            .addSelect(['customers.name as name', 'customers.surnames as surnames', 'customers.phone as phone', 'customers.email as email'])
             .innerJoin("orders.customer", "customers")
             .groupBy('customers.name')
             .addGroupBy('customers.surnames')
@@ -38,7 +38,7 @@ export class OrderRepository extends Repository<Order> {
                 .andWhere('orders."createdAt" < :date_end', filter);
         }
         return Promise.all([
-            query.limit(filter.take).offset(filter.skip).orderBy("purchases", 'DESC').getMany(),
+            query.limit(filter.take).offset(filter.skip).orderBy("purchases", 'DESC').getRawMany(),
             query.getCount()
         ]);
     }

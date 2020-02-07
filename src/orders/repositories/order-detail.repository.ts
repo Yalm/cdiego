@@ -6,7 +6,7 @@ export class OrderDetailRepository extends Repository<OrderToProduct> {
 
     topProduct(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
         let query = this.createQueryBuilder('order_details')
-            .select(['products.name', 'products.id'])
+            .select(['products.name as name', 'products.id'])
             .addSelect("SUM(order_details.quantity)", "quantity")
             .innerJoin("order_details.product", "products")
             .innerJoin("order_details.order", "orders")
@@ -18,7 +18,7 @@ export class OrderDetailRepository extends Repository<OrderToProduct> {
                 .andWhere('orders."createdAt" < :date_end', filter);
         }
         return Promise.all([
-            query.limit(filter.take).offset(filter.skip).orderBy("quantity", 'DESC').getMany(),
+            query.limit(filter.take).offset(filter.skip).orderBy("quantity", 'DESC').getRawMany(),
             query.getCount()
         ]);
     }
