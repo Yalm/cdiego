@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Document } from 'src/documents/entities/documents.entity';
 import { Order } from 'src/orders/entities/order.entity';
 
@@ -36,4 +36,10 @@ export class Customer {
 
     @Column({ length: 191 })
     documentNumber: string;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 }
