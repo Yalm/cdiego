@@ -37,7 +37,7 @@ export class AuthController {
         return this.authService.sendResetEmail(email, { host: req.headers.origin as string });
     }
 
-    @Post('customer/password/reset')
+    @Post('password/reset')
     reset(@Body() resetPasswordDto: ResetPasswordDto): Promise<Token> {
         return this.authService.reset(resetPasswordDto);
     }
