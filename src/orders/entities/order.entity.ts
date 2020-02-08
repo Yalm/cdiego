@@ -17,6 +17,9 @@ export class Order {
     @Column()
     amount?: number;
 
+    @Column()
+    customerId?: number;
+
     @OneToOne(() => Payment, payment => payment.order)
     payment: Payment;
 
