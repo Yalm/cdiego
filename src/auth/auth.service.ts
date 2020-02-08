@@ -95,17 +95,19 @@ export class AuthService {
 
     async resetUser(resetPasswordDto: ResetPasswordDto): Promise<Token> {
         await this.validateToken({ token: resetPasswordDto.token, email: resetPasswordDto.email });
-        const user = await this.usersService.updateOne({ email: resetPasswordDto.email }, {
+        await this.usersService.updateOne({ email: resetPasswordDto.email }, {
             password: hashSync(resetPasswordDto.password)
         });
+        const user = await this.usersService.findByEmail(resetPasswordDto.email);
         return this.respondWithToken(user);
     }
 
     async reset(resetPasswordDto: ResetPasswordDto): Promise<Token> {
         await this.validateToken({ token: resetPasswordDto.token, email: resetPasswordDto.email });
-        const customer = await this.customersService.updateOne({ email: resetPasswordDto.email }, {
+        await this.customersService.updateOne({ email: resetPasswordDto.email }, {
             password: hashSync(resetPasswordDto.password)
         });
+        const customer = await this.customersService.findByEmail(resetPasswordDto.email);
         return this.respondWithToken(customer);
     }
 
