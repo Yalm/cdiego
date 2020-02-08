@@ -34,7 +34,7 @@ export class OrdersController {
 
     @Get()
     async findAll(
-        @Query() query: { search: string, skip: number, take: number, order: any }
+        @Query() query: { search: string, skip: number, take: number, order: any,where:any }
     ): Promise<[Order[], number]> {
         return this.orderRepository.paginate(query);
     }

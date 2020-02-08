@@ -1,9 +1,9 @@
-import { Controller, Get, Query, Post, Body, Param, Put, HttpException, HttpStatus } from "@nestjs/common";
+import { Controller, Get, Query, Post, Body, Param, Put, HttpException, HttpStatus, Delete } from "@nestjs/common";
 import { CreateCategoryDto } from "./dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CategoryRepository } from "./categories.repository";
 import { Category } from "./entities/category.entity";
-import { FindManyOptions, FindOneOptions, Like, UpdateResult } from "typeorm";
+import { FindManyOptions, FindOneOptions, Like, UpdateResult, DeleteResult } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 @Controller("categories")
@@ -54,5 +54,10 @@ export class CategoriesController {
             }
             return error;
         }
+    }
+
+    @Delete(":id")
+    deleteById(@Param("id") id: string): Promise<DeleteResult> {
+        return this.categoryRepository.delete(id);
     }
 }

@@ -4,7 +4,7 @@ import { Order } from "../entities/order.entity";
 @EntityRepository(Order)
 export class OrderRepository extends Repository<Order> {
 
-    paginate(filter: { search: string, skip: number, take: number, order: any }): Promise<[Order[], number]> {
+    paginate(filter: { search: string, skip: number, take: number, order: any, where: any }): Promise<[Order[], number]> {
         let query = this.createQueryBuilder('orders')
             .innerJoinAndSelect("orders.customer", "customers")
             .innerJoinAndSelect("orders.state", "states")
@@ -12,6 +12,10 @@ export class OrderRepository extends Repository<Order> {
             query = query.where("states.name like :search", { search: `${filter.search}%` })
                 .orWhere('CAST(orders.id AS text) = :search', filter)
                 .orWhere('customers.name like :search', { search: `${filter.search}%` });
+        }
+
+        if (filter.where && filter.where.customerId) {
+            query = query.where("orders.customerId = :id", { id: filter.where.customerId });
         }
 
         if (filter.order) {
