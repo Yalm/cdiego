@@ -14,7 +14,7 @@ export class ProductRepository extends Repository<Product> {
 
         if (filter.category) query = query.andWhere("category.name like :category", filter);
         return Promise.all([
-            query.limit(filter.limit || 10).offset(filter.skip || 0).getMany(),
+            query.limit(filter.limit || 10).offset(filter.skip || 0).orderBy('product.createdAt', 'DESC').getMany(),
             query.getCount()
         ]);
     }
