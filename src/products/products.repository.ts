@@ -8,8 +8,7 @@ export class ProductRepository extends Repository<Product> {
         let query = this.createQueryBuilder('product')
             .innerJoinAndSelect("product.category", "category");
         if (filter.search) {
-            query = query.where("product.name ILIKE :name", { name: `%${filter.search}%` })
-                .orWhere("product.stock = :stock", { stock: filter.search });
+            query = query.where("product.name ILIKE :name", { name: `%${filter.search}%` });
         }
 
         if (filter.category) query = query.andWhere("category.name like :category", filter);
