@@ -14,8 +14,8 @@ export class OrderRepository extends Repository<Order> {
                 .orWhere('customers.name like :search', { search: `${filter.search}%` });
         }
 
-        if (filter.where && filter.where.customerId) {
-            query = query.where("orders.customerId = :id", { id: filter.where.customerId });
+        if (filter.where && filter.where.customer) {
+            query = query.where("orders.customerId = :id", { id: filter.where.customer });
         }
 
         if (filter.order) {

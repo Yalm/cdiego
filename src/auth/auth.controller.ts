@@ -28,7 +28,7 @@ export class AuthController {
     @HttpCode(204)
     async store(@Req() req: Request, @Body() createCustomerDto: CreateCustomerDto): Promise<void> {
         const customer = await this.customersService.store(createCustomerDto);
-        await this.authService.sendVerificationEmail(customer.email, { name: customer.name, host: req.headers.origin as string });
+        await this.authService.sendVerificationEmail(customer.email, { name: customer.name,return:createCustomerDto.return, host: req.headers.origin as string });
     }
 
     @Post('password/email')

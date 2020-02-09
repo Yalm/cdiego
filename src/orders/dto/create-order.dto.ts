@@ -10,7 +10,9 @@ export interface CreateOrderDto {
     readonly culqi_token: string;
     readonly shipping: boolean;
     readonly items: Items[];
-    readonly departament?: number;
-    readonly province?: number;
+    readonly departament?: string;
+    readonly province?: string;
     readonly description?: string;
+    readonly departament_name?: string;
+    readonly province_name?: string;
 }

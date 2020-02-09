@@ -1,6 +1,6 @@
 import { Controller, Post, Body, UseGuards, Get, Query, Param, Put } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
-import { CreateOrderDto } from "./dto";
+import { CreateOrderDto, ContactDto } from "./dto";
 import { AuthGuard } from "@nestjs/passport";
 import { User } from "src/auth/decorators/user.decorator";
 import { OrderRepository } from "./repositories";
@@ -8,6 +8,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { FindManyOptions, FindOneOptions, UpdateResult } from "typeorm";
 import { Order } from "./entities";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import { Payload } from "src/auth/interfaces";
 
 @Controller("orders")
 export class OrdersController {
@@ -34,7 +35,7 @@ export class OrdersController {
 
     @Get()
     async findAll(
-        @Query() query: { search: string, skip: number, take: number, order: any,where:any }
+        @Query() query: { search: string, skip: number, take: number, order: any, where: any }
     ): Promise<[Order[], number]> {
         return this.orderRepository.paginate(query);
     }
@@ -42,10 +43,10 @@ export class OrdersController {
     @UseGuards(AuthGuard('jwt'))
     @Post()
     async create(
-        @User() { id },
+        @User() user: Payload,
         @Body() order: CreateOrderDto
     ): Promise<void> {
-        return this.ordersService.store(id, order);
+        return this.ordersService.store(user, order);
     }
 
     @Put(":id")
@@ -54,5 +55,12 @@ export class OrdersController {
         @Body() product: QueryDeepPartialEntity<Order>
     ): Promise<UpdateResult> {
         return this.orderRepository.update(id, product);
+    }
+
+    @Post('contact')
+    async contact(
+        @Body() contact: ContactDto
+    ): Promise<void> {
+        await this.ordersService.contact(contact);
     }
 }

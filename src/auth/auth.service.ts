@@ -55,7 +55,7 @@ export class AuthService {
         throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
     }
 
-    async sendVerificationEmail(email: string, options: { name?: string, host: string, from?: string }): Promise<void> {
+    async sendVerificationEmail(email: string, options: { name?: string, host: string, from?: string, return?: string }): Promise<void> {
         // Create a verification token for this user
         const { token } = await this.passwordResetRepository.save({
             token: randomBytes(16).toString('hex'),
@@ -66,8 +66,11 @@ export class AuthService {
         await this.sendGrid.send({
             from: options.from || `no-reply@comercialdiego.com`,
             to: email,
-            subject: 'Verifica tu dirección de correo electrónico',
-            html: verification({ host: options.host, token, name: options.name })
+            templateId: 'd-8cd6a61b0e0e45ab96f47ab5a73e8caf',
+            dynamicTemplateData: {
+                name: options.name,
+                url: `${options.host}/email/verify/${token}${options.return ? `?return=${options.return}` : ''}`
+            }
         });
     }
 
@@ -124,9 +127,9 @@ export class AuthService {
         return token;
     }
 
-    private respondWithToken({ id, name, avatar }: any): Token {
+    private respondWithToken({ id, name, avatar, email }: any): Token {
         return {
-            access_token: this.jwtService.sign({ sub: id, name, avatar })
+            access_token: this.jwtService.sign({ sub: id, name, avatar, email })
         };
     }
 }

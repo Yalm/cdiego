@@ -1,13 +1,14 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, HttpStatus, HttpException } from "@nestjs/common";
 import { OrderRepository } from "./repositories/order.repository";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ShippingRepository, OrderDetailRepository } from "./repositories";
-import { CreateOrderDto } from "./dto";
+import { CreateOrderDto, CulqiResponseChargeDto, ContactDto } from "./dto";
 import { ProductsService } from "src/products/products.service";
 import { PaymentsService } from "src/payments/payments.service";
 import { CulqiService } from "./culqi.service";
 import { SendGridService } from "@anchan828/nest-sendgrid";
 import { orderUser } from "./views/emails/order-user.view";
+import { Payload } from "src/auth/interfaces";
 
 @Injectable()
 export class OrdersService {
@@ -22,22 +23,28 @@ export class OrdersService {
         @InjectRepository(ShippingRepository) private readonly shippingRepository: ShippingRepository
     ) { }
 
-    async store(customerId: number, data: CreateOrderDto) {
-        let amount = data.items.reduce((total, { price, quantity }) => total += price * quantity, 0);
+    async store(customer: Payload, data: CreateOrderDto) {
+        const subtotal = data.items.reduce((total, { price, quantity }) => total += price * quantity, 0);
+        let amount = subtotal;
 
         if (data.shipping) {
-            amount += 10;
+            amount += data.departament === '3655' ? 10 : 20;
         }
 
-        const { data: culqi } = await this.culqiService.charge({
-            amount: amount * 100,
-            currency_code: 'PEN',
-            email: data.email,
-            source_id: data.culqi_token
-        });
+        let culqi: CulqiResponseChargeDto;
+        try {
+            culqi = await this.culqiService.charge({
+                amount: amount * 100,
+                currency_code: 'PEN',
+                email: customer.email,
+                source_id: data.culqi_token
+            });
+        } catch ({ response }) {
+            throw new HttpException(response.data, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
 
         const order = await this.orderRepository.save({
-            customer: customerId,
+            customer: customer.id,
             amount, state: 2,
             description: data.description
         } as any);
@@ -52,9 +59,9 @@ export class OrdersService {
         if (data.shipping) {
             await this.shippingRepository.save({
                 order,
-                departamentId: data.departament,
-                provinceId: data.province,
-                price: 10
+                departamentId: parseInt(data.departament),
+                provinceId: parseInt(data.province),
+                price: data.departament === '3655' ? 10 : 20
             });
         }
 
@@ -67,7 +74,22 @@ export class OrdersService {
         }
 
         await this.sendGrid.send({
-            from:  'no-reply@comercialdiego.com',
+            from: 'pedido@comercialdiego.com',
+            to: customer.email,
+            templateId: 'd-3598400f5f114a948657acdbde1f796e',
+            dynamicTemplateData: {
+                name: customer.name,
+                subtotal: subtotal.toFixed(2),
+                total: amount.toFixed(2),
+                id: order.id,
+                culqi,
+                shipping_price: data.departament === '3655' ? 10 : 20,
+                ...data
+            }
+        });
+
+        await this.sendGrid.send({
+            from: 'no-reply@comercialdiego.com',
             to: 'comercialdiegohyo@gmail.com',
             subject: 'Nuevo pedido',
             html: orderUser(order)
@@ -84,5 +106,14 @@ export class OrdersService {
 
     topCustomer(filter: { date_init: string, date_end: string, skip: number, take: number }): Promise<[any[], number]> {
         return this.orderRepository.topCustomer(filter);
+    }
+
+    contact(data: ContactDto) {
+        return this.sendGrid.send({
+            from: 'no-reply@comercialdiego.com',
+            to: 'comercialdiegohyo@gmail.com',
+            templateId: 'd-96d2b39f651640ed950a1293dfbf6615',
+            dynamicTemplateData: data
+        });
     }
 }
