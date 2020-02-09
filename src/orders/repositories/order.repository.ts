@@ -15,7 +15,7 @@ export class OrderRepository extends Repository<Order> {
         }
 
         if (filter.where && filter.where.customer) {
-            query = query.where("orders.customerId = :id", { id: filter.where.customer });
+            query = query.where('orders."customerId" = :id', { id: filter.where.customer });
         }
 
         if (filter.order) {
