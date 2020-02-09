@@ -26,9 +26,11 @@ export class OrdersService {
     async store(customer: Payload, data: CreateOrderDto) {
         const subtotal = data.items.reduce((total, { price, quantity }) => total += price * quantity, 0);
         let amount = subtotal;
+        let shipping_price = 0;
 
         if (data.shipping) {
-            amount += data.departament === '3655' ? 10 : 20;
+            shipping_price = data.departament === '3655' ? data.province === '3656' ? 0 : 10 : 20
+            amount += shipping_price;
         }
 
         let culqi: CulqiResponseChargeDto;
@@ -61,7 +63,7 @@ export class OrdersService {
                 order,
                 departamentId: parseInt(data.departament),
                 provinceId: parseInt(data.province),
-                price: data.departament === '3655' ? 10 : 20
+                price: shipping_price
             });
         }
 
@@ -83,7 +85,7 @@ export class OrdersService {
                 total: amount.toFixed(2),
                 id: order.id,
                 culqi,
-                shipping_price: data.departament === '3655' ? 10 : 20,
+                shipping_price,
                 ...data
             }
         });
