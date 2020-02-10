@@ -1,6 +1,6 @@
 import { Controller, Post, HttpCode, Body, Req, UseGuards, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignEmailPasswordDto, ValidationTokenDto, ResetPasswordDto } from './dto';
+import { SignEmailPasswordDto, ValidationTokenDto, ResetPasswordDto, SignGoogleDto } from './dto';
 import { Token } from './interfaces/token.interface';
 import { Request } from 'express';
 import { CustomersService } from 'src/customers/customers.service';
@@ -19,6 +19,15 @@ export class AuthController {
         private readonly authService: AuthService
     ) { }
 
+    @Post('login/google')
+    async loginByGoogle(
+        @Body() { authorizationData, oauthData }: SignGoogleDto
+    ) {
+        const { email } = await this.authService.loginByGoogle({ code: oauthData.code, redirect_uri: authorizationData.redirect_uri });
+        const token = await this.authService.attempt({ email }, { provider: true });
+        return token;
+    }
+
     @Post('login')
     create(@Body() signEmailPasswordDto: SignEmailPasswordDto): Promise<Token> {
         return this.authService.attempt(signEmailPasswordDto, { verifyEmail: true });
@@ -28,7 +37,7 @@ export class AuthController {
     @HttpCode(204)
     async store(@Req() req: Request, @Body() createCustomerDto: CreateCustomerDto): Promise<void> {
         const customer = await this.customersService.store(createCustomerDto);
-        await this.authService.sendVerificationEmail(customer.email, { name: customer.name,return:createCustomerDto.return, host: req.headers.origin as string });
+        await this.authService.sendVerificationEmail(customer.email, { name: customer.name, return: createCustomerDto.return, host: req.headers.origin as string });
     }
 
     @Post('password/email')

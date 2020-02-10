@@ -1,22 +1,24 @@
-import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException, HttpService } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compareSync, hashSync } from 'bcryptjs';
 import { SignEmailPasswordDto, ValidationTokenDto, ResetPasswordDto } from './dto';
 import { Token } from './interfaces';
 import { randomBytes } from 'crypto';
 import { SendGridService } from "@anchan828/nest-sendgrid";
-import { reset, verification } from './views/emails';
+import { reset } from './views/emails';
 import { CustomersService } from 'src/customers/customers.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PasswordResetRepository } from './password-reset.repository';
 import { Repository, Raw } from 'typeorm';
 import { PasswordReset } from './entities/password-reset.entity';
 import { UsersService } from 'src/users/users.service';
+import { switchMap, map } from 'rxjs/operators';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly usersService: UsersService,
+        private readonly httpService: HttpService,
         private readonly customersService: CustomersService,
         private readonly jwtService: JwtService,
         private readonly sendGrid: SendGridService,
@@ -27,7 +29,7 @@ export class AuthService {
     private async validate<T>(
         guard: T,
         password: string,
-        options?: { verifyEmail: boolean }): Promise<T> {
+        options?: { verifyEmail?: boolean }): Promise<T> {
         if (guard && compareSync(password, guard['password'])) {
             if (options && options.verifyEmail && !guard['emailVerifiedAt']) {
                 throw new HttpException({ code: 'auth/user-not-verified-email' }, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -37,19 +39,23 @@ export class AuthService {
         return null;
     }
 
-    async attemptUser({ email, password }: SignEmailPasswordDto, options?: { verifyEmail: boolean }): Promise<Token> {
+    async attemptUser({ email, password }: SignEmailPasswordDto, options?: { provider: boolean }): Promise<Token> {
         const guard = await this.usersService.findByEmail(email);
-        const entity = await this.validate(guard, password, options);
+        const entity = await this.validate(guard, password);
         if (entity) {
             return this.respondWithToken(entity);
         }
         throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
     }
 
-    async attempt({ email, password }: SignEmailPasswordDto, options?: { verifyEmail: boolean }): Promise<Token> {
+    async attempt({ email, password }: SignEmailPasswordDto, options?: { verifyEmail?: boolean, provider?: boolean }): Promise<Token> {
         const guard = await this.customersService.findByEmail(email);
-        const entity = await this.validate(guard, password, options);
-        if (entity) {
+        if (!guard) {
+            throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
+        }
+
+        const entity = options.provider ? guard : await this.validate(guard, password, options);
+        if (entity || options && options.provider) {
             return this.respondWithToken(entity);
         }
         throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
@@ -131,5 +137,18 @@ export class AuthService {
         return {
             access_token: this.jwtService.sign({ sub: id, name, avatar, email })
         };
+    }
+
+    loginByGoogle({ redirect_uri, code }: { redirect_uri: string, code: string }): Promise<{ email: string }> {
+        return this.httpService.post('https://www.googleapis.com/oauth2/v4/token', {
+            code, redirect_uri,
+            client_id: '230642192836-5763ibgi0827ssim1oidilrse4gp98a3.apps.googleusercontent.com',
+            client_secret: 'PiH1xM433Mkllxo3UnG9DdUj',
+            grant_type: 'authorization_code'
+        }).pipe(switchMap(({ data }) => {
+            return this.httpService.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${data.access_token}` }
+            }).pipe(map(({ data }) => data))
+        })).toPromise();
     }
 }
