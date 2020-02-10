@@ -48,10 +48,12 @@ export class AuthService {
         throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
     }
 
-    async attempt({ email, password }: SignEmailPasswordDto, options?: { verifyEmail?: boolean, provider?: boolean }): Promise<Token> {
-        const guard = await this.customersService.findByEmail(email);
-        if (!guard) {
+    async attempt({ email, password, name }: SignEmailPasswordDto, options?: { verifyEmail?: boolean, provider?: boolean }): Promise<Token> {
+        let guard = await this.customersService.findByEmail(email);
+        if (!guard && options && !options.provider) {
             throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
+        } else if (!guard && options && options.provider) {
+            guard = await this.customersService.store({ email, name });
         }
 
         const entity = options.provider ? guard : await this.validate(guard, password, options);
