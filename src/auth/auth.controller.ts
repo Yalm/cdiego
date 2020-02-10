@@ -73,6 +73,6 @@ export class AuthController {
     @Get('complete')
     async complete(@User() { id }: Payload): Promise<boolean> {
         const customer = await this.customersService.show(id);
-        return customer && customer.surnames && customer.phone ? true : false;
+        return customer && customer.phone ? true : false;
     }
 }
