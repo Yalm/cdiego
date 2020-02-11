@@ -24,10 +24,12 @@ export class CustomersService {
         return this.customerRepository.findAndCount(query);
     }
 
-    async store(createCustomerDto: CreateCustomerDto): Promise<Customer> {
+    async store(createCustomerDto: CreateCustomerDto, skipPassword?: boolean): Promise<Customer> {
         try {
-            const salt = await genSalt(10);
-            createCustomerDto.password = await hash(createCustomerDto.password, salt);
+            if(!skipPassword) {
+                const salt = await genSalt(10);
+                createCustomerDto.password = await hash(createCustomerDto.password, salt);
+            }
             const customer = await this.customerRepository.save(createCustomerDto);
             return customer;
         } catch (error) {
@@ -55,7 +57,7 @@ export class CustomersService {
     // }
 
     findByEmail(email: string): Promise<Customer> {
-        return this.customerRepository.findOne({ where: { email }, select: ['password', 'emailVerifiedAt', 'id', 'name', 'email'] });
+        return this.customerRepository.findOne({ where: { email }, select: ['password', 'emailVerifiedAt', 'id', 'name', 'email','avatar'] });
     }
 
     updateOne(conditions: FindConditions<Customer>, data: any): Promise<UpdateResult> {

@@ -24,7 +24,9 @@ export class AuthController {
         @Body() { authorizationData, oauthData }: SignGoogleDto
     ) {
         const oauth = await this.authService.loginByGoogle({ code: oauthData.code, redirect_uri: authorizationData.redirect_uri });
-        const token = await this.authService.attempt(oauth, { provider: true });
+        const token = await this.authService.attempt(
+            { surnames: oauth.family_name, name: oauth.given_name, avatar: oauth.picture, email: oauth.email },
+            { provider: true });
         return token;
     }
 

@@ -14,6 +14,9 @@ export class Customer {
     surnames: string;
 
     @Column({ length: 191, unique: true })
+    avatar: string;
+
+    @Column({ length: 191, unique: true })
     email: string;
 
     @Column()

@@ -48,15 +48,15 @@ export class AuthService {
         throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
     }
 
-    async attempt({ email, password, name }: SignEmailPasswordDto, options?: { verifyEmail?: boolean, provider?: boolean }): Promise<Token> {
-        let guard = await this.customersService.findByEmail(email);
+    async attempt(data: SignEmailPasswordDto | any, options?: { verifyEmail?: boolean, provider?: boolean }): Promise<Token> {
+        let guard = await this.customersService.findByEmail(data.email);
         if (!guard && options && !options.provider) {
             throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
         } else if (!guard && options && options.provider) {
-            guard = await this.customersService.store({ email, name, emailVerifiedAt: new Date() });
+            guard = await this.customersService.store({ ...data, emailVerifiedAt: new Date() }, true);
         }
 
-        const entity = options.provider ? guard : await this.validate(guard, password, options);
+        const entity = options.provider ? guard : await this.validate(guard, data.password, options);
         if (entity || options && options.provider) {
             return this.respondWithToken(entity);
         }
@@ -141,7 +141,7 @@ export class AuthService {
         };
     }
 
-    loginByGoogle({ redirect_uri, code }: { redirect_uri: string, code: string }): Promise<{ email: string }> {
+    loginByGoogle({ redirect_uri, code }: { redirect_uri: string, code: string }): Promise<{ email: string, family_name: string, given_name: string, picture: string }> {
         return this.httpService.post('https://www.googleapis.com/oauth2/v4/token', {
             code, redirect_uri,
             client_id: '230642192836-5763ibgi0827ssim1oidilrse4gp98a3.apps.googleusercontent.com',
