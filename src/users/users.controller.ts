@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { AuthGuard } from '@nestjs/passport';
-import { FindManyOptions, FindOneOptions, DeleteResult, UpdateResult, Like } from 'typeorm';
+import { FindManyOptions, FindOneOptions, DeleteResult, UpdateResult, Raw } from 'typeorm';
 import { FileInterceptor } from '@nestjs/platform-express';
 import MulterGoogleCloudStorage from 'multer-google-storage';
 import { resolve } from 'path';
@@ -24,8 +24,8 @@ export class UsersController {
     ): Promise<[User[], number]> {
         if (query['search']) {
             query.where = [
-                { name: Like(`%${query['search']}%`) },
-                { email: Like(`%${query['search']}%`) }
+                { name: Raw(alias => `${alias} ILIKE '%${query['search']}%'`) },
+                { email: Raw(alias => `${alias} ILIKE '%${query['search']}%'`) }
             ];
         }
         return this.usersService.paginate(query);

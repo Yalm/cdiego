@@ -3,7 +3,7 @@ import { CustomersService } from './customers.service';
 import { Customer } from './entities/customer.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { AuthGuard } from '@nestjs/passport';
-import { FindManyOptions, FindOneOptions, DeleteResult, Like } from 'typeorm';
+import { FindManyOptions, FindOneOptions, DeleteResult, Raw } from 'typeorm';
 
 @Controller('customers')
 export class CustomersController {
@@ -18,8 +18,8 @@ export class CustomersController {
     ): Promise<[Customer[], number]> {
         if (query['search']) {
             query.where = [
-                { name: Like(`%${query['search']}%`) },
-                { email: Like(`%${query['search']}%`) }
+                { name: Raw(alias => `${alias} ILIKE '%${query['search']}%'`) },
+                { email: Raw(alias => `${alias} ILIKE '%${query['search']}%'`) }
             ];
         }
         return this.customersService.paginate(query);
