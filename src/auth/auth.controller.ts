@@ -23,8 +23,8 @@ export class AuthController {
     async loginByGoogle(
         @Body() { authorizationData, oauthData }: SignGoogleDto
     ) {
-        const { email } = await this.authService.loginByGoogle({ code: oauthData.code, redirect_uri: authorizationData.redirect_uri });
-        const token = await this.authService.attempt({ email }, { provider: true });
+        const oauth = await this.authService.loginByGoogle({ code: oauthData.code, redirect_uri: authorizationData.redirect_uri });
+        const token = await this.authService.attempt(oauth, { provider: true });
         return token;
     }
 

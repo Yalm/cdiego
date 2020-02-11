@@ -3,5 +3,6 @@ export interface CreateCustomerDto {
     readonly surnames?: string;
     readonly email: string;
     readonly return?: string;
+    readonly emailVerifiedAt?: Date;
     password?: string;
 }

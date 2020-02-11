@@ -53,7 +53,7 @@ export class AuthService {
         if (!guard && options && !options.provider) {
             throw new HttpException({ code: 'auth/user-not-found' }, HttpStatus.UNAUTHORIZED);
         } else if (!guard && options && options.provider) {
-            guard = await this.customersService.store({ email, name });
+            guard = await this.customersService.store({ email, name, emailVerifiedAt: new Date() });
         }
 
         const entity = options.provider ? guard : await this.validate(guard, password, options);
